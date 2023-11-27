@@ -53,7 +53,7 @@ __Forwardgram Plus (on Steroids)__ is a free and open source, telegram to discor
 
 2. Read the Version History and Changelog and below before running the script.
 
-3. Run the command `python3 ForwardGram.py config.yaml`
+3. Run the command `python3 forwardgram.py config.yaml`
 
 ```
 ***PLEASE NOTE:  In the first time initializing the script, you will be requried to validate your phone number using telegram API. This happens only at the first time (per session name).
