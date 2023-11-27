@@ -6,7 +6,8 @@
 > The workflow is the same as the original forwardgram, but it is base un multiple threads, one dedicated to the Discord bot.
 
 
-# Telegram to Discord Message Bot — Forward Telegram Messages to Discord
+# Telegram to Discord Message Bot  
+## Forward Telegram Messages to Discord
 ### For other development or support, please contact me via discord  [@Aaarghhh](aaarghhh).
 
 
