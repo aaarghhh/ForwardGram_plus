@@ -1,0 +1,39 @@
+# Telegram
+# This has to be an integer. Read more [here](https://core.telegram.org/api/obtaining_api_id) | No quotes
+
+api_id: 12343432 #your Telegram API ID
+# Long 32 characters hash identifier. Read more [here](https://core.telegram.org/api/obtaining_api_id) | With quotes
+api_hash: 'aebcbcbcbcbcbcbcbcbcbcbcbcbcbcbcb' #your Telegram API Hash
+
+# Session name. Only one session (with a unique session name) can run at a time | With quotes
+session_name: 'forwardgram' #your Telegram Session Name, it will be created if it doesn't exist as a file
+
+# Discord Bot Token. Go create a bot on discord. | No quotes
+discord_bot_token: ABCDEDEEEDEDFEFEFEFGGEG.123ASDASDSDASDASDSAD #your Discord Bot Token
+
+
+# you can index Telegram channels by ID or by name or by username.
+# you can also specify the language of the output channel, for enable such feature you need to add the language code after the channel name or id os username for both input and output channels.
+forward_1:
+  - input:
+      - telegram_channel:
+            - language: en
+            - id: 12345678787 #your Telegram Channel ID
+  - output:
+      - telegram_channel_1:  #your Telegram Channel ID
+            - language: it
+            - id: 12345678787
+      - discord_channel_1:
+            - language: it
+            - id: 116123123123123123123 #your Discord Channel ID
+forward_2:
+  - input:
+      - telegram_channel: #your Telegram Channel ID
+            - language: en
+            - name: 'PLACE THE CHANNEL NAME HERE'
+  - output:
+      - telegram_channel_1: #your Telegram Channel ID
+            - id: 12345678787
+      - discord_channel_1: #your Discord Channel ID
+            - language: it
+            - name: 'PLACE THE CHANNEL NAME HERE'
