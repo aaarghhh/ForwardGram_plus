@@ -7,7 +7,7 @@
 
 
 # Telegram to Discord Message Bot  
-## Forward Telegram Messages to Discord
+## Forward Telegram Messages to Discord
 ### For other development or support, please contact me via discord  [@Aaarghhh](aaarghhh).
 
 
