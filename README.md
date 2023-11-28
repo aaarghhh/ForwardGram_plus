@@ -3,7 +3,7 @@
 
 > This is a fully refactored and updated version of the original forwardgram, startingfrom the ground up. 
 > It is a fork of the original forwardgram, and is not intended to replace it. 
-> The workflow is the same as the original forwardgram, but it is base un multiple threads, one dedicated to the Discord bot.
+> The workflow is the same as the original forwardgram, but it is based on multiple threads, one dedicated to the Discord bot and one for Telegram events. So basically it doesn't need to create a new connection for each Telegram event.
 
 
 ## Telegram to Discord Message Bot, Forward Telegram Messages to Discord
