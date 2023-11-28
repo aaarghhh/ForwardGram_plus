@@ -7,10 +7,10 @@
 
 
 ## Telegram to Discord Message Bot, Forward Telegram Messages to Discord
-For other development or support, please contact me via discord  [@Aaarghhh](aaarghhh).  
+For other development or support, please contact me via discord  `@Aaarghhh`.  
 
 ## Description
-__Forwardgram Plus (on Steroids)__ is a free and open source, telegram to discord message bot. It was creating starting from the idea of [Forwardgram](https://github.com/kkapuria3/Telegram-To-Discord-Forward-Bot) and fully refactored. It enables one to forward messages from Multiple Telegram channels to one (or more) Telegram/Discord channels of your own. This python bot monitors multiple telegram channels. When a new message/entity is sent, it will parse the response and forward it to a discord channel using your own personalized bot. This steroid version support a native translation and presents a label indicating the source of the message.
+__Forwardgram Plus (on Steroids)__ is a free and open source, telegram to discord message bot. It was created starting from the idea of [Forwardgram](https://github.com/kkapuria3/Telegram-To-Discord-Forward-Bot). It enables one to forward messages from Multiple Telegram channels to one (or more) Telegram/Discord channels of your own. This python bot monitors multiple telegram channels. When a new message/entity is sent, it will parse the response and forward it to a discord channel using your own personalized bot. This steroid version support a native translation and presents a label indicating the source of the message.
 
 
 
