@@ -1,0 +1,8 @@
+venv
+.idea
+*.pyc
+*.pyo
+*.pyd
+*.swp
+config.yml
+*.session
