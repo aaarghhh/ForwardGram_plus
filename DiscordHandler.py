@@ -28,7 +28,7 @@ class DiscordHandler:
 
     async def send_message_content(self, channel_id, message):
         channel = self.client.get_channel(channel_id)
-        await channel.send(message)
+        await channel.send(message,suppress_embeds=True)
         return True
 
     def launch_bot(self):
