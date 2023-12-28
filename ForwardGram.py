@@ -44,7 +44,7 @@ class Forwardgram:
             translation = translator.translate(mess_txt,dest=dest_lang)
             original_language = translation.src
             translated_text = translation.text
-            out = {"tmessage": translated_text, "confidence": translation_confidence, "olanguage": original_language}
+            out = {"tmessage": translated_text, "confidence": translation_confidence, "olanguage": original_language, "omessage": mess_txt}
         return out
 
     async def retrieve_config(self):
@@ -174,18 +174,27 @@ class Forwardgram:
                 message = Forwardgram.process_message(event.message.message, channel["language"])["tmessage"]
             else:
                 message = event.message.message
-
             await self.client.forward_messages(channel["entity"], message)
+
         for channel in self.forward_settings[event.message.chat.id]["discord"]:
+            detected_language = ""
             if "language" in channel.keys() and channel["language"] != "":
-                message = Forwardgram.process_message(event.message.message, channel["language"])["tmessage"]
+                translated_message = Forwardgram.process_message(event.message.message, channel["language"])
+                message = translated_message["tmessage"]
+                detected_language = translated_message["olanguage"]
             else:
                 message = event.message.message
+            if detected_language != "":
+                detected_language = f"[{detected_language.upper()}]"
 
             if event.message.chat.username and event.message.chat.username != "":
-                message = f"_[{event.message.chat.title}]( https://t.me/{event.message.chat.username}), posted:_\n>>> {message}"
+                message = f"_[{event.message.chat.title} {detected_language}]( https://t.me/{event.message.chat.username}/{event.message.id}), posted:_\n>>> {message}"
             else:
-                message = f"_{event.message.chat.title}_, posted_:\n>>> {message}"
+                message = f"_[{event.message.chat.title} {detected_language}]( https://t.me/{event.message.chat.id}/{event.message.id}), posted:_\n>>> {message}"
+
+            if message.strip() == "":
+                message = ">>> [Empty message, or with no text, follow the link to see the original message]"
+
             self.discord.send_async_message(channel["entity"],message)
 
 if __name__ == "__main__":
