@@ -171,26 +171,27 @@ class Forwardgram:
     async def new_message_handler(self,event):
         for channel in self.forward_settings[event.message.chat.id]["telegram"]:
             if "language" in channel.keys() and channel["language"] != "":
-                message = Forwardgram.process_message(event.message.message, channel["language"])["tmessage"]
+                message = Forwardgram.process_message(event.message.text, channel["language"])["tmessage"]
+                message = message.replace("] (","](").replace(") ,","),")
             else:
-                message = event.message.message
+                message = event.message.text
             await self.client.forward_messages(channel["entity"], message)
 
         for channel in self.forward_settings[event.message.chat.id]["discord"]:
             detected_language = ""
             if "language" in channel.keys() and channel["language"] != "":
-                translated_message = Forwardgram.process_message(event.message.message, channel["language"])
-                message = translated_message["tmessage"]
+                translated_message = Forwardgram.process_message(event.message.text, channel["language"])
+                message = translated_message["tmessage"].replace("] (","](").replace(") ,","),")
                 detected_language = translated_message["olanguage"]
             else:
-                message = event.message.message
+                message = event.message.text
             if detected_language != "":
-                detected_language = f"[{detected_language.upper()}]"
+                detected_language = f"({detected_language.upper()})"
 
             if event.message.chat.username and event.message.chat.username != "":
-                message = f"_[{event.message.chat.title} {detected_language}]( https://t.me/{event.message.chat.username}/{event.message.id}), posted:_\n>>> {message}"
+                message = f"_[{event.message.chat.title} {detected_language}](https://t.me/{event.message.chat.username}/{event.message.id}), posted:_\n>>> {message}"
             else:
-                message = f"_[{event.message.chat.title} {detected_language}]( https://t.me/{event.message.chat.id}/{event.message.id}), posted:_\n>>> {message}"
+                message = f"_[{event.message.chat.title} {detected_language}](https://t.me/{event.message.chat.id}/{event.message.id}), posted:_\n>>> {message}"
 
             if message.strip() == "":
                 message = ">>> [Empty message, or with no text, follow the link to see the original message]"
