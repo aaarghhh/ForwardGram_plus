@@ -7,23 +7,31 @@ import DiscordHandler
 import subprocess
 from googletrans import Translator
 import re
+import os
 import asyncio
+import Util
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logging.getLogger('telethon').setLevel(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
+
 class Forwardgram:
+
     forward_settings = {}
     input_channels_entities = []
-    def __init__(self, config):
-        self.config = config
-        self.client = TelegramClient(config["session_name"],
-                                     config["api_id"],
-                                     config["api_hash"])
+    temp_dir = os.path.join(os.path.dirname(__file__), 'temp')
+    group_id_messages = {}
+    util = Util.Util()
+
+    def __init__(self):
+        self.config = self.util.get_config()
+        self.client = TelegramClient(self.config["session_name"],
+                                     self.config["api_id"],
+                                     self.config["api_hash"])
 
         loop = asyncio.get_event_loop()  # Here
-        self.discord = DiscordHandler.DiscordHandler(config["discord_bot_token"])
+        self.discord = DiscordHandler.DiscordHandler(self.config["discord_bot_token"])
         self.client.start()
         self.client.add_event_handler(self.new_message_handler, events.NewMessage(chats=self.input_channels_entities))
         loop.run_until_complete(self.retrieve_config())
@@ -149,7 +157,6 @@ class Forwardgram:
                                         forward["entity"] = await self.retrieve_channels(username=attr["username"])
                                     elif "language" in attr.keys():
                                         forward["language"] = attr["language"]
-
                                 current_forward["telegram"].append(forward)
 
                             elif "discord_channel" in key_name:
@@ -167,11 +174,25 @@ class Forwardgram:
                 elif current_chl.channel_id in self.forward_settings.keys():
                     print(f"[-] Error: Channel {current_chl.channel_id} is already configured in another forward, check you config.yml.")
 
+    #implement a static function for extracting a caption from a message via regex
+    def extract_caption(self, message):
+        caption = ""
+        if message.entities:
+            for entity in message.entities:
+                if entity.__class__.__name__ == "MessageEntityTextUrl":
+                    caption = message.message[entity.offset:entity.offset + entity.length]
+                    break
+        return caption
 
     async def new_message_handler(self,event):
+
+        ### creare un unico messaggio con tutti i file
+        ### introdurre OCR con messaggio
+        ### introdurre vision per le immagini e la loro descrizione
+
         for channel in self.forward_settings[event.message.chat.id]["telegram"]:
             if "language" in channel.keys() and channel["language"] != "":
-                message = Forwardgram.process_message(event.message.text, channel["language"])["tmessage"]
+                message = self.util.process_message(event.message.text, channel["language"])["tmessage"]
                 message = message.replace("] (","](").replace(") ,","),")
             else:
                 message = event.message.text
@@ -180,28 +201,61 @@ class Forwardgram:
         for channel in self.forward_settings[event.message.chat.id]["discord"]:
             detected_language = ""
             if "language" in channel.keys() and channel["language"] != "":
-                translated_message = Forwardgram.process_message(event.message.text, channel["language"])
-                message = translated_message["tmessage"].replace("] (","](").replace(") ,","),")
+                match, message = Util.Util.extract_message_url(event.message.text)
+                translated_message = self.util.process_message(message, channel["language"])
+                message = Util.Util.recover_url(translated_message["tmessage"], match)
+                message = Util.Util.clean_message(message)
                 detected_language = translated_message["olanguage"]
             else:
                 message = event.message.text
             if detected_language != "":
                 detected_language = f"({detected_language.upper()})"
 
-            if event.message.chat.username and event.message.chat.username != "":
-                message = f"_[{event.message.chat.title} {detected_language}](https://t.me/{event.message.chat.username}/{event.message.id}), posted:_\n>>> {message}"
-            else:
-                message = f"_[{event.message.chat.title} {detected_language}](https://t.me/{event.message.chat.id}/{event.message.id}), posted:_\n>>> {message}"
+            ### to do implementare lista di file
+            ### valutare se il grouped del messaggio di telegram è uguale al precedente
+            ### se è uguale non modficare il messaggio aggiungendo il file
 
-            if message.strip() == "":
-                message = ">>> [Empty message, or with no text, follow the link to see the original message]"
+            message_pieces = Util.Util.split_message(message)
+            photo_sent = True
+            first_message = True
+            for mmsg in message_pieces:
+                photo_list_path = []
+                photo_list = []
+                if event.message.photo and photo_sent:
+                        filename = str(event.message.photo.id) + event.message.file.ext
+                        await event.message.download_media(os.path.join(self.temp_dir, filename))
+                        photo_list_path.append(os.path.join(self.temp_dir, filename))
 
-            self.discord.send_async_message(channel["entity"],message)
+                        #picture_string = Util.Util.process_image(os.path.join(self.temp_dir, filename))
+                        #print(picture_string)
+
+                        with open(os.path.join(self.temp_dir, filename), 'rb') as filehandle:
+                            picture = self.discord.generate_discord_file(filehandle)
+                            photo_list.append(picture)
+                        photo_sent = False
+
+                if not first_message:
+                    mmsg = ">>> ...." + mmsg
+                first_message = False
+
+                if event.message.chat.username and event.message.chat.username != "":
+                    message = f"_[{event.message.chat.title} {detected_language}](https://t.me/{event.message.chat.username}/{event.message.id}), posted:_\n>>> {mmsg}"
+                else:
+                    message = f"_[{event.message.chat.title} {detected_language}](https://t.me/c/{event.message.chat.id}/{event.message.id}), posted:_\n>>> {mmsg}"
+
+                if message.strip() == "":
+                    message = ">>> [Empty message, or with no text, follow the link to see the original message]"
+
+                if len(photo_list) > 0:
+                    self.discord.send_async_message(channel["entity"],message,files=photo_list)
+                else:
+                    self.discord.send_async_message(channel["entity"],message)
+
+                for photo in photo_list_path:
+                    os.remove(photo)
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print(f"Usage: {sys.argv[0]} {{CONFIG_PATH}}")
         sys.exit(1)
-    with open(sys.argv[1], 'rb') as f:
-        config = yaml.safe_load(f)
-    Forwardgram(config)
+    Forwardgram()
