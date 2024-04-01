@@ -73,6 +73,16 @@ class Util:
         return res
 
     @staticmethod
+    def detect_image_lang(img_path):
+        try:
+            osd = pytesseract.image_to_osd(img_path)
+            script = re.search("Script: ([a-zA-Z]+)\n", osd).group(1)
+            conf = re.search("Script confidence: (\d+\.?(\d+)?)", osd).group(1)
+            return script, float(conf)
+        except Exception as e:
+            return None, 0.0
+
+    @staticmethod
     def process_message(mess, dest_lang):
         out = {"tmessage": "", "confidence": 0, "olanguage": ""}
         if mess is not None:
@@ -85,7 +95,7 @@ class Util:
             translation_confidence = detection.confidence
             translation = translator.translate(mess_txt, dest=dest_lang)
             original_language = translation.src
-            translated_text = translation.text
+            translated_text = translation.text.strip("\"")
             out = {
                 "tmessage": translated_text,
                 "confidence": translation_confidence,
@@ -104,7 +114,7 @@ class Util:
                     image_path, timeout=2, lang=_lang
                 )  # Timeout after 2 seconds
             else:
-                image_string = pytesseract.image_to_string(image_path, timeout=2)
+                image_string = pytesseract.image_to_string(image_path, timeout=2, output_type='data.frame')
         except RuntimeError as timeout_error:
             # Tesseract processing is terminated
             pass

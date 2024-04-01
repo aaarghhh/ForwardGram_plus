@@ -318,13 +318,14 @@ class Forwardgram:
                 )
                 photo_list_path.append(os.path.join(self.temp_dir, filename))
                 if self.forward_settings[event.message.chat.id]["ocr"]:
-                    dest_lang = None
+                    dest_lang = "eng"
                     if self.forward_settings[event.message.chat.id]["language_processing"] != "":
-                        dest_lang = self.forward_settings[event.message.chat.id]["language_processing"]
+                        dest_lang = dest_lang + "+" + self.forward_settings[event.message.chat.id]["language_processing"]
 
-                    picture_string = Util.Util.process_ocr_image(os.path.join(self.temp_dir, filename), dest_lang)
+                    picture_string = Util.Util.process_ocr_image(os.path.join(self.temp_dir, filename), dest_lang).strip()
                     translated_ocr = self.util.process_message(picture_string, channel["language"])
-                    ocr_messages = Util.Util.split_message(translated_ocr["tmessage"])
+                    ocr_strings = translated_ocr["tmessage"]
+                    ocr_messages = Util.Util.split_message(ocr_strings)
 
                 with open(
                         os.path.join(self.temp_dir, filename), "rb"
@@ -377,7 +378,8 @@ class Forwardgram:
                     if mmsg.strip() != "":
                         self.discord.send_async_message(channel["entity"], message)
 
-
+            ## SENDING OCR MESSAGES
+            await asyncio.sleep(0.5)
             if ocr_messages:
                 first_message = True
                 for msg_piece in ocr_messages["messages"]:
