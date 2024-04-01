@@ -17,8 +17,9 @@ discord_bot_token: ABCDEDEEEDEDFEFEFEFGGEG.123ASDASDSDASDASDSAD #your Discord Bo
 forward_1:
   - input:
       - telegram_channel:
-            - language: en
+            - language: rus ## language code used by Tessaract for OCR
             - id: 12345678787 #your Telegram Channel ID
+            - ocr: true #enable OCR for this channel
   - output:
       - telegram_channel_1:  #your Telegram Channel ID
             - language: it
