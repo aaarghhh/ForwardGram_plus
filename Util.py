@@ -39,7 +39,7 @@ class Util:
     @staticmethod
     def extract_message_url(msg):
         match = re.findall(
-            r"((?:[*]{2})?\[(?:[*]{2})?[\w\s\n\u00a9\u00ae\u2000-\u3300\ud83c\ud000-\udfff\ud83d\ud000-\udfff\ud83e\ud000-\udfffа-я]+(?:[*]{2})?\]\((?:[*]{2})?https?://[\S\n]+(?:[*]{2})?\)(?:[*]{2})?)",
+            r"((?:[*]{2})?\[(?:[*]{2})?[\w\s\n\u00a9\u00ae\u2000-\u3300\ud83c\ud000-\udfff\ud83d\ud000-\udfff\ud83e\ud000-\udfffа-яА-Я]+(?:[*]{2})?\]\((?:[*]{2})?https?://[\S\n]+(?:[*]{2})?\)(?:[*]{2})?)",
             msg,
             re.IGNORECASE | re.MULTILINE,
         )
@@ -106,16 +106,19 @@ class Util:
 
     @staticmethod
     def process_ocr_image(image_path, lang=None):
+        _lang = ""
         image_string = ""
         try:
             if lang:
                 _lang = lang
                 image_string = pytesseract.image_to_string(
-                    image_path, timeout=2, lang=_lang
+                    image_path, lang=_lang
                 )  # Timeout after 2 seconds
             else:
-                image_string = pytesseract.image_to_string(image_path, timeout=2, output_type='data.frame')
+                image_string = pytesseract.image_to_string(image_path)
         except RuntimeError as timeout_error:
             # Tesseract processing is terminated
+            print("[-] Timeout error: " + str(timeout_error), "SETTINGS: ", _lang)
             pass
+        #print("[-] OCR result: " + image_string, "SETTINGS: ", lang)
         return image_string

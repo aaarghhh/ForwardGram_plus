@@ -30,13 +30,14 @@ class DiscordHandler:
 
     def send_async_message(self, channel, message, files=None):
         if files:
-            asyncio.run_coroutine_threadsafe(
+            result = asyncio.run_coroutine_threadsafe(
                 self.send_message_content(channel, message, files=files), self.loop
             )
         else:
-            asyncio.run_coroutine_threadsafe(
+            result = asyncio.run_coroutine_threadsafe(
                 self.send_message_content(channel, message), self.loop
             )
+        #print(result.result())
 
     async def get_channel(self, channel_id):
         try:

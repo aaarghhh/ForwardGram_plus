@@ -293,14 +293,16 @@ class Forwardgram:
             ):
                 filename = str(event.message.video.id) + event.message.file.ext
                 await event.message.download_media(os.path.join(self.temp_dir, filename))
-                photo_list_path.append(os.path.join(self.temp_dir, filename))
-                with open(
-                        os.path.join(self.temp_dir, filename), "rb"
-                ) as filehandle:
-                    video = self.discord.generate_discord_file(filehandle)
-                    photo_list.append(video)
+                check_file = os.stat(os.path.join(self.temp_dir, filename)).st_size
+                if (check_file != 0):
+                    photo_list_path.append(os.path.join(self.temp_dir, filename))
+                    with open(
+                            os.path.join(self.temp_dir, filename), "rb"
+                    ) as filehandle:
+                        video = self.discord.generate_discord_file(filehandle)
+                        photo_list.append(video)
 
-                if len(message_pieces["messages"]) == 0:
+                if len(message_pieces["messages"]) == 0 and len(photo_list) > 0:
                     self.discord.send_async_message(
                         channel["entity"], "", files=photo_list
                     )
@@ -333,7 +335,7 @@ class Forwardgram:
                     picture = self.discord.generate_discord_file(filehandle)
                     photo_list.append(picture)
 
-            if len(message_pieces["messages"])==0:
+            if len(message_pieces["messages"])==0 and not photo_sent:
                 self.discord.send_async_message(
                     channel["entity"], "", files=photo_list
                 )
@@ -376,9 +378,10 @@ class Forwardgram:
                     photo_sent = True
                 else:
                     if mmsg.strip() != "":
+                        ## avoid ratelimting
+                        await asyncio.sleep(0.35)
                         self.discord.send_async_message(channel["entity"], message)
 
-            ## SENDING OCR MESSAGES
             await asyncio.sleep(0.5)
             if ocr_messages:
                 first_message = True
@@ -406,7 +409,7 @@ class Forwardgram:
                             message = f"_[{event.message.chat.title} {detected_language}](https://t.me/{event.message.chat.username}/{event.message.id})_, OCR TEXT:\n```{mmsg}```"
                         else:
                             message = f"_[{event.message.chat.title} {detected_language}](https://t.me/c/{event.message.chat.id}/{event.message.id})_, OCR TEXT:\n```{mmsg}```"
-
+                        await asyncio.sleep(0.35)
                         self.discord.send_async_message(channel["entity"], message)
 
             for photo in photo_list_path:
